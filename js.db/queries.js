@@ -100,6 +100,55 @@ async function updateEmployeeRole(employeeId, newRoleId) {
     }
 }
 
+async function updateEmployeeManager(employeeId, newManagerId) {
+    try{
+        const res = await pool.query('UPDATE employee SET manager_id = 1$ WHERE id = $2 RETURNING *', [newManagerId, employeeId]);
+        return res.rows[0];
+    }catch (error) {
+        console.error('Failed to update employee manager', error);
+        throw error;
+    }
+}
+
+async function viewEmployeesByManager(managerId) {
+    try{
+        const res = await pool.query('SELECT * FROM employee WHERE manager_id = 1$', [managerId]);
+        return res.rows[0];
+    }catch(error) {
+        console.error('Failed to retrive employees by manager', error);
+        throw error;
+    }
+}
+
+async function deleteDepartment(departmentId) {
+    try {
+        await pool.query('DELETE FROM department WHERE id = $1', [departmentId]); 
+        console.log('Department Deleted successfully!'); 
+    } catch (error) {
+        console.error('Failed to delete department', error);
+    }
+}
+
+async function deleteRole(roleId) {
+    try {
+        await pool.query('DELETE FROM role WHERE id = $1', [roleId]); 
+        console.log('Role Deleted successfully!'); 
+    } catch (error) {
+        console.error('Failed to delete role', error);
+    }
+}
+
+async function deleteEmployee(employeeId) {
+    try {
+        await pool.query('DELETE FROM employee WHERE id = $1', [employeeId]); 
+        console.log('Employee Deleted successfully!'); 
+    } catch (error) {
+        console.error('Failed to delete employee', error);
+    }
+}
+
+
+
 module.exports = {
     getAllDepartments,
     getAllRoles,
@@ -107,5 +156,10 @@ module.exports = {
     addDepartment,
     addRole,
     addEmployee,
-    updateEmployeeRole
+    updateEmployeeRole,
+    updateEmployeeManager,
+    viewEmployeesByManager,
+    deleteDepartment,
+    deleteRole,
+    deleteEmployee
 };

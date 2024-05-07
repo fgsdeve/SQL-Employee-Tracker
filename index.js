@@ -7,7 +7,11 @@ const {
     addDepartment,
     addRole,
     addEmployee,
-    updateEmployeeRole
+    updateEmployeeRole,
+    deleteDepartment,
+    deleteRole,
+    deleteEmployee,
+    updateEmployeeManager
 } = require('./js.db/queries'); // Ensure the path is correct
 
 async function mainMenu() {
@@ -24,6 +28,12 @@ async function mainMenu() {
                 'Add Role',
                 'View All Departments',
                 'Add Department',
+                'Update Employer Manger',
+                'View Employees By Manager',
+                'Delete Department',
+                'Delete Role',
+                'Delete Employee',
+                'View Total Department Budget',
                 'Exit'
             ]
         });
@@ -56,10 +66,27 @@ async function mainMenu() {
             case 'Add Department':
                 await promptAddDepartment();
                 break;
+            case 'Update Employer Manger':
+                await promptUpdateEmployeeManager();
+                break;
+            case 'View Employees By Manager':
+                await promptViewEmployeesByManager();
+                break;
+            case 'Delete Department':
+                await promptDeleteDepartment();
+                break;
+            case 'Delete Role':
+                await promptDeleteRole();
+                break;
+            case 'Delete Employee':
+                await promptDeleteEmployee();
+                break; 
+            case 'View Total Department Budget':
+                await promptViewTotalDepartmentBudget();
+                break;
             case 'Exit':
                 console.log('Exiting application...');
                 process.exit();
-                break;
             default:
                 console.log('Invalid action');
         }
@@ -134,6 +161,59 @@ async function promptUpdateEmployeeRole() {
         console.error('Failed to update employee role:', error);
     }
 }
+
+async function promptDeleteDepartment() {
+    try {
+        const { departmentId } = await inquirer.prompt({
+            name: 'departmentId',
+            type: 'input',
+            message: "Enter the department ID to delete:"
+        });
+        await deleteDepartment(departmentId);
+    } catch (error) {
+        console.error('Failed to prompt delete department:', error);
+    }
+}
+ 
+ async function promptDeleteRole() {
+    try{
+        const { roleId } = await inquirer.prompt({
+            name:'roleId',
+            type: 'input',
+            message: "Enter the role ID to delete:"
+        });
+        await deleteRole(roleId);
+    } catch (error) {
+        console.error('Failed to prompt delete role:', error);
+    }
+}
+  
+  async function promptDeleteEmployee() {
+    try{
+        const { employeeId } = await inquirer.prompt({
+            name: 'employeeId',
+            type: 'input',
+            message: "Enter the employee ID to be delete:"
+        });
+        await deleteEmployee( employeeId);
+    }catch(error){
+        console.error('Failed to prompt delete employee', error);
+    }
+  }
+
+ async function promptUpdateEmployeeManager() {
+    try {
+        const { employeeId, newManagerId } = await inquirer.prompt([
+            { name: 'employeeId', type: 'input', message: "Enter the employee's ID to update:" },
+            { name: 'newManagerId', type: 'input', message: "Enter the new manager's ID:" }
+        ]);
+        const updatedEmployeeManager = await updateEmployeeManager(employeeId, newManagerId);
+        console.log(`Employee manager updated successfully:`, updatedEmployeeManager);
+    } catch (error) {
+        console.error('Failed to update employee manager:', error);
+    }
+}
+
 
 mainMenu();
 
