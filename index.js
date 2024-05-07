@@ -1,5 +1,4 @@
-// index.js - Handles the command-line interface for user interactions
-
+require('dotenv').config();
 const inquirer = require('inquirer');
 const {
     getAllDepartments,
@@ -9,78 +8,132 @@ const {
     addRole,
     addEmployee,
     updateEmployeeRole
- } = require('./js.db/queries'); // Here we are connecting the path files from queries to the main ffile.
+} = require('./js.db/queries'); // Ensure the path is correct
 
-const mainMenu = async () => {
-    const answer = await inquirer.prompt({
-        type: 'list',
-        name: 'action',
-        message: 'What would you like to do? (Use arrow keys)',
-        choices: [
-            'View All Employees',
-            'Add Employee',
-            'Update Employee Role',
-            'View All Roles',
-            'Add Role',
-            'View All Departments',
-            'Add Department',
-            'Exit'
-        ]
-    });
-
+async function mainMenu() {
     try {
+        const answer = await inquirer.prompt({
+            type: 'list',
+            name: 'action',
+            message: 'What would you like to do? (Use arrow keys)',
+            choices: [
+                'View All Employees',
+                'Add Employee',
+                'Update Employee Role',
+                'View All Roles',
+                'Add Role',
+                'View All Departments',
+                'Add Department',
+                'Exit'
+            ]
+        });
+
         switch (answer.action) {
             case 'View All Employees':
-                // Fetch and display all employees from the database
                 const employees = await getAllEmployees();
-                console.log(employees);
+                console.log("All Employees:");
+                console.table(employees); // Display data in a table format
                 break;
             case 'Add Employee':
-                // Prompt user to add a new employee and display the result
-                const newEmployee = await addEmployee();
-                console.log(newEmployee);
-                console.log('Employee added successfully!');
+                await promptAddEmployee();
                 break;
             case 'Update Employee Role':
-                // Prompt user to update an existing employee's role and display the updated result
-                const updatedRole = await updateEmployeeRole();
-                console.log(updatedRole);
-                console.log('Employee role updated successfully!');
+                await promptUpdateEmployeeRole();
                 break;
             case 'View All Roles':
-                // Fetch and display all roles from the database
                 const roles = await getAllRoles();
-                console.log(roles);
+                console.log("All Roles:");
+                console.table(roles); // Display data in a table format
                 break;
             case 'Add Role':
-                // Prompt user to add a new role and display the result
-                const newRole = await addRole();
-                console.log(newRole);
-                console.log('Role added successfully!');
+                await promptAddRole();
                 break;
             case 'View All Departments':
-                // Fetch and display all departments from the database
                 const departments = await getAllDepartments();
-                console.log(departments);
+                console.log("All Departments:");
+                console.table(departments); // Display data in a table format
                 break;
             case 'Add Department':
-                // Prompt user to add a new department and display the result
-                const newDepartment = await addDepartment();
-                console.log(newDepartment);
-                console.log('Department added successfully!');
+                await promptAddDepartment();
                 break;
             case 'Exit':
-                // Exit the application
                 console.log('Exiting application...');
                 process.exit();
+                break;
+            default:
+                console.log('Invalid action');
         }
     } catch (error) {
-        // Handle errors that may occur during the operation
         console.error('Error occurred: ', error);
     }
 
-    // Re-run main menu after actions
     setTimeout(mainMenu, 500);
-};
+}
+
+async function promptAddEmployee() {
+    try {
+        const employeeDetails = await inquirer.prompt([
+            { name: 'firstName', type: 'input', message: "Enter the employee's first name:" },
+            { name: 'lastName', type: 'input', message: "Enter the employee's last name:" },
+            { name: 'roleId', type: 'input', message: "Enter the employee's role ID:", validate: input => /^\d+$/.test(input) ? true : "Please enter a valid ID." },
+            {
+                name: 'managerId',
+                type: 'input',
+                message: "Enter the employee's manager ID (or leave blank for none):",
+                validate: input => input === '' || /^\d+$/.test(input) ? true : "Please enter a valid ID or leave blank.",
+                filter: input => input === '' ? null : parseInt(input)
+            }
+        ]);
+        const { firstName, lastName, roleId, managerId } = employeeDetails;
+        const newEmployee = await addEmployee(firstName, lastName, roleId, managerId);
+        console.log(`Employee added successfully:`, newEmployee);
+    } catch (error) {
+        console.error('Failed to add employee:', error);
+    }
+}
+
+async function promptAddDepartment() {
+    try {
+        const { name } = await inquirer.prompt({
+            name: 'name',
+            type: 'input',
+            message: "Enter the new department's name:"
+        });
+        const newDepartment = await addDepartment(name);
+        console.log(`Department added successfully:`, newDepartment);
+    } catch (error) {
+        console.error('Failed to add department:', error);
+    }
+}
+
+async function promptAddRole() {
+    try {
+        const roleDetails = await inquirer.prompt([
+            { name: 'title', type: 'input', message: "Enter the title of the new role:" },
+            { name: 'salary', type: 'input', message: "Enter the salary for the new role:" },
+            { name: 'departmentId', type: 'input', message: "Enter the department ID for the new role:" }
+        ]);
+        const { title, salary, departmentId } = roleDetails;
+        const newRole = await addRole(title, parseFloat(salary), departmentId);
+        console.log(`Role added successfully:`, newRole);
+    } catch (error) {
+        console.error('Failed to add role:', error);
+    }
+}
+
+
+async function promptUpdateEmployeeRole() {
+    try {
+        const { employeeId, newRoleId } = await inquirer.prompt([
+            { name: 'employeeId', type: 'input', message: "Enter the employee's ID to update:" },
+            { name: 'newRoleId', type: 'input', message: "Enter the new role ID:" }
+        ]);
+        const updatedRole = await updateEmployeeRole(employeeId, newRoleId);
+        console.log(`Employee role updated successfully:`, updatedRole);
+    } catch (error) {
+        console.error('Failed to update employee role:', error);
+    }
+}
 
 mainMenu();
+

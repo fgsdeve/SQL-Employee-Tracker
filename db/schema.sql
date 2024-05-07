@@ -1,3 +1,6 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS employee, role, department CASCADE;
+
 -- Create the department table
 CREATE TABLE department (
     id SERIAL PRIMARY KEY,
