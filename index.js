@@ -11,7 +11,9 @@ const {
     deleteDepartment,
     deleteRole,
     deleteEmployee,
-    updateEmployeeManager
+    updateEmployeeManager,
+    viewTotalDepartmentBudget,
+    viewEmployeesByManager
 } = require('./js.db/queries'); // Ensure the path is correct
 
 async function mainMenu() {
@@ -19,71 +21,85 @@ async function mainMenu() {
         const answer = await inquirer.prompt({
             type: 'list',
             name: 'action',
-            message: 'What would you like to do? (Use arrow keys)',
+            message: 'How can I help you today? (Use arrow keys)',
             choices: [
                 'View All Employees',
-                'Add Employee',
-                'Update Employee Role',
-                'View All Roles',
-                'Add Role',
                 'View All Departments',
-                'Add Department',
-                'Update Employer Manger',
+                'View All Roles',
                 'View Employees By Manager',
+                'View Total Department Budget',
+                'Add Employee',
+                'Add Role',
+                'Add Department',
+                'Update Employee Role',
+                'Update Employer Manager',         
                 'Delete Department',
                 'Delete Role',
                 'Delete Employee',
-                'View Total Department Budget',
                 'Exit'
             ]
         });
 
         switch (answer.action) {
-            case 'View All Employees':
-                const employees = await getAllEmployees();
-                console.log("All Employees:");
-                console.table(employees); // Display data in a table format
-                break;
-            case 'Add Employee':
-                await promptAddEmployee();
-                break;
-            case 'Update Employee Role':
-                await promptUpdateEmployeeRole();
-                break;
-            case 'View All Roles':
-                const roles = await getAllRoles();
-                console.log("All Roles:");
-                console.table(roles); // Display data in a table format
-                break;
-            case 'Add Role':
-                await promptAddRole();
-                break;
+            
             case 'View All Departments':
                 const departments = await getAllDepartments();
                 console.log("All Departments:");
                 console.table(departments); // Display data in a table format
                 break;
-            case 'Add Department':
-                await promptAddDepartment();
+
+            case 'View All Roles':
+                 const roles = await getAllRoles();
+                console.log("All Roles:");
+                console.table(roles); // Display data in a table format
                 break;
-            case 'Update Employer Manger':
-                await promptUpdateEmployeeManager();
+
+            case 'View All Employees':
+                const employees = await getAllEmployees();
+                console.log("All Employees:");
+                console.table(employees); // Display data in a table format
                 break;
+
+             case 'View Total Department Budget':
+                await promptViewTotalDepartmentBudget();
+                break;
+
             case 'View Employees By Manager':
                 await promptViewEmployeesByManager();
                 break;
+
+            case 'Add Department':
+                    await promptAddDepartment();
+                    break;
+
+            case 'Add Role':
+                    await promptAddRole();
+                    break;
+
+            case 'Add Employee':
+                await promptAddEmployee();
+                break;
+
+            case 'Update Employee Role':
+                await promptUpdateEmployeeRole();
+                break;
+
+            case 'Update Employer Manger':
+                await promptUpdateEmployeeManager();
+                break;
+
             case 'Delete Department':
                 await promptDeleteDepartment();
                 break;
+
             case 'Delete Role':
                 await promptDeleteRole();
                 break;
+
             case 'Delete Employee':
                 await promptDeleteEmployee();
-                break; 
-            case 'View Total Department Budget':
-                await promptViewTotalDepartmentBudget();
                 break;
+
             case 'Exit':
                 console.log('Exiting application...');
                 process.exit();
@@ -162,6 +178,48 @@ async function promptUpdateEmployeeRole() {
     }
 }
 
+async function promptUpdateEmployeeManager() {
+    try {
+        const { employeeId, newManagerId } = await inquirer.prompt([
+            { name: 'employeeId', type: 'input', message: "Enter the employee's ID to update:" },
+            { name: 'newManagerId', type: 'input', message: "Enter the new manager's ID:" }
+        ]);
+        const updatedEmployeeManager = await updateEmployeeManager(employeeId, newManagerId);
+        console.log(`Employee manager updated successfully:`, updatedEmployeeManager);
+    } catch (error) {
+        console.error('Failed to update employee manager:', error);
+    }
+}
+
+async function promptViewEmployeesByManager() {
+    try {
+        const { managerId } = await inquirer.prompt({
+            name: 'managerId',
+            type: 'input',
+            message: "Enter the manager's ID to view employees:"
+        });
+        const employeesManagedByManager = await viewEmployeesByManager(managerId);
+        console.log("Employees managed by manager:", employeesManagedByManager);
+    } catch (error) {
+        console.error('Failed to view employees by manager:', error);
+    }
+}
+
+async function promptViewTotalDepartmentBudget() {
+    try {
+        const { departmentId } = await inquirer.prompt({
+            name: 'departmentId',
+            type: 'input',
+            message: "Enter the department ID to view the total budget:"
+        });
+        const totalBudget = await viewTotalDepartmentBudget(departmentId);
+        console.log(`Total budget for department ${departmentId}: $${totalBudget}`);
+    } catch (error) {
+        console.error('Failed to view total department budget:', error);
+    }
+}
+
+
 async function promptDeleteDepartment() {
     try {
         const { departmentId } = await inquirer.prompt({
@@ -200,20 +258,6 @@ async function promptDeleteDepartment() {
         console.error('Failed to prompt delete employee', error);
     }
   }
-
- async function promptUpdateEmployeeManager() {
-    try {
-        const { employeeId, newManagerId } = await inquirer.prompt([
-            { name: 'employeeId', type: 'input', message: "Enter the employee's ID to update:" },
-            { name: 'newManagerId', type: 'input', message: "Enter the new manager's ID:" }
-        ]);
-        const updatedEmployeeManager = await updateEmployeeManager(employeeId, newManagerId);
-        console.log(`Employee manager updated successfully:`, updatedEmployeeManager);
-    } catch (error) {
-        console.error('Failed to update employee manager:', error);
-    }
-}
-
 
 mainMenu();
 
