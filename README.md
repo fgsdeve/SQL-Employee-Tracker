@@ -41,6 +41,7 @@ SQL Employee Tracker is a command-line application built with Node.js for managi
 ## Usage
 
 Follow the on-screen prompts to navigate through the application and perform various actions such as viewing, adding, updating, and deleting employees, roles, and departments.
+here is the walkthrough video for a better understanding; https://drive.google.com/file/d/1dq_g5w0ap8R7u6ANK5zsz4y1O1epjGfR/view
 
 ## Dependencies
 
